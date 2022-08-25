@@ -148,6 +148,8 @@ void setup()
   ws.beginSSL("ledmatrix.edjopato.de", 443, "/ws");
   ws.onEvent(webSocketEvent);
   ws.setReconnectInterval(5000);
+  // every ms, timeout ms, failed after n times
+  ws.enableHeartbeat(15000, 3000, 2);
 
   matrix_setup(mqttBri << BRIGHTNESS_SCALE);
 
@@ -188,6 +190,7 @@ void onConnectionEstablished()
   mqtt.publish(BASE_TOPIC "git-version", GIT_VERSION, MQTT_RETAINED);
   mqtt.publish(BASE_TOPIC "connected", "1", MQTT_RETAINED);
   lastConnected = 1;
+  lastPublishedClientAmount = 0;
 }
 
 void loop()
