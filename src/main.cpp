@@ -12,7 +12,7 @@ using namespace ArduinoJson;
 #define CLIENT_NAME "espMatrix-etVertical"
 const bool MQTT_RETAINED = false;
 
-EspMQTTClient mqtt(
+EspMQTTClient mqttClient(
     WIFI_SSID,
     WIFI_PASSWORD,
     MQTT_SERVER,
@@ -31,15 +31,15 @@ WebSocketsClient ws;
 #define BASE_TOPIC_STATUS BASE_TOPIC "status/"
 
 #ifdef ESP8266
-	#define LED_BUILTIN_ON LOW
-	#define LED_BUILTIN_OFF HIGH
+  #define LED_BUILTIN_ON LOW
+  #define LED_BUILTIN_OFF HIGH
 #else // for ESP32
-	#define LED_BUILTIN_ON HIGH
-	#define LED_BUILTIN_OFF LOW
+  #define LED_BUILTIN_ON HIGH
+  #define LED_BUILTIN_OFF LOW
 #endif
 
-MQTTKalmanPublish mkCommandsPerSecond(mqtt, BASE_TOPIC_STATUS "commands-per-second", false, 30 /* every 30 sec */, 10);
-MQTTKalmanPublish mkRssi(mqtt, BASE_TOPIC_STATUS "rssi", MQTT_RETAINED, 12 * 5 /* every 5 min */, 10);
+MQTTKalmanPublish mkCommandsPerSecond(mqttClient, BASE_TOPIC_STATUS "commands-per-second", false, 30 /* every 30 sec */, 10);
+MQTTKalmanPublish mkRssi(mqttClient, BASE_TOPIC_STATUS "rssi", MQTT_RETAINED, 12 * 5 /* every 5 min */, 10);
 
 boolean on = true;
 uint8_t mqttBri = 2;
@@ -111,7 +111,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     size_t clients = object["clients"];
     if (lastPublishedClientAmount != clients)
     {
-      bool success = mqtt.publish(BASE_TOPIC_STATUS "clients", String(clients), MQTT_RETAINED);
+      bool success = mqttClient.publish(BASE_TOPIC_STATUS "clients", String(clients), MQTT_RETAINED);
       if (success)
       {
         lastPublishedClientAmount = clients;
@@ -154,11 +154,11 @@ void setup()
   matrix_setup(mqttBri << BRIGHTNESS_SCALE);
 
 #ifdef PRINT_TO_SERIAL
-  mqtt.enableDebuggingMessages();
+  mqttClient.enableDebuggingMessages();
 #endif
-  mqtt.enableHTTPWebUpdater();
-  mqtt.enableOTA();
-  mqtt.enableLastWillMessage(BASE_TOPIC "connected", "0", MQTT_RETAINED);
+  mqttClient.enableHTTPWebUpdater();
+  mqttClient.enableOTA();
+  mqttClient.enableLastWillMessage(BASE_TOPIC "connected", "0", MQTT_RETAINED);
 
   // well, hope we are OK, let's draw some colors first :)
   testMatrix();
@@ -171,33 +171,33 @@ void setup()
 
 void onConnectionEstablished()
 {
-  mqtt.subscribe(BASE_TOPIC_SET "bri", [](const String &payload) {
+  mqttClient.subscribe(BASE_TOPIC_SET "bri", [](const String &payload) {
     int value = strtol(payload.c_str(), 0, 10);
     mqttBri = max(1, min(255 >> BRIGHTNESS_SCALE, value));
     matrix_brightness((mqttBri << BRIGHTNESS_SCALE) * on);
-    mqtt.publish(BASE_TOPIC_STATUS "bri", String(mqttBri), MQTT_RETAINED);
+    mqttClient.publish(BASE_TOPIC_STATUS "bri", String(mqttBri), MQTT_RETAINED);
   });
 
-  mqtt.subscribe(BASE_TOPIC_SET "on", [](const String &payload) {
+  mqttClient.subscribe(BASE_TOPIC_SET "on", [](const String &payload) {
     boolean value = payload != "0";
     on = value;
     matrix_brightness((mqttBri << BRIGHTNESS_SCALE) * on);
-    mqtt.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
+    mqttClient.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
   });
 
-  mqtt.publish(BASE_TOPIC_STATUS "bri", String(mqttBri), MQTT_RETAINED);
-  mqtt.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
-  mqtt.publish(BASE_TOPIC "git-version", GIT_VERSION, MQTT_RETAINED);
-  mqtt.publish(BASE_TOPIC "connected", "1", MQTT_RETAINED);
+  mqttClient.publish(BASE_TOPIC_STATUS "bri", String(mqttBri), MQTT_RETAINED);
+  mqttClient.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
+  mqttClient.publish(BASE_TOPIC "git-version", GIT_VERSION, MQTT_RETAINED);
+  mqttClient.publish(BASE_TOPIC "connected", "1", MQTT_RETAINED);
   lastConnected = 1;
   lastPublishedClientAmount = 0;
 }
 
 void loop()
 {
-  mqtt.loop();
-  digitalWrite(LED_BUILTIN, mqtt.isConnected() ? LED_BUILTIN_OFF : LED_BUILTIN_ON);
-  if (!mqtt.isWifiConnected())
+  mqttClient.loop();
+  digitalWrite(LED_BUILTIN, mqttClient.isConnected() ? LED_BUILTIN_OFF : LED_BUILTIN_ON);
+  if (!mqttClient.isWifiConnected())
   {
     return;
   }
@@ -205,12 +205,12 @@ void loop()
   ws.loop();
 
   auto nextConnected = ws.isConnected() ? 2 : 1;
-  if (nextConnected != lastConnected && mqtt.isConnected())
+  if (nextConnected != lastConnected && mqttClient.isConnected())
   {
-    if (mqtt.publish(BASE_TOPIC "connected", String(nextConnected), MQTT_RETAINED))
-		{
-    	lastConnected = nextConnected;
-		}
+    if (mqttClient.publish(BASE_TOPIC "connected", String(nextConnected), MQTT_RETAINED))
+    {
+      lastConnected = nextConnected;
+    }
   }
 
   auto now = millis();
@@ -239,7 +239,7 @@ void loop()
   }
 
   // 50 ms -> 20 FPS
-	// 33 ms -> 30 FPS
+  // 33 ms -> 30 FPS
   // 25 ms -> 40 FPS
   // 20 ms -> 50 FPS
   // 16 ms -> 62.2 FPS
