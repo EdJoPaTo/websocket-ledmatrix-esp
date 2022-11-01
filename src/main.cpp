@@ -151,7 +151,7 @@ void setup()
   // every ms, timeout ms, failed after n times
   ws.enableHeartbeat(15000, 3000, 2);
 
-  matrix_setup(mqttBri << BRIGHTNESS_SCALE);
+  matrix_setup(mqttBri);
 
 #ifdef PRINT_TO_SERIAL
   mqttClient.enableDebuggingMessages();
@@ -173,15 +173,15 @@ void onConnectionEstablished()
 {
   mqttClient.subscribe(BASE_TOPIC_SET "bri", [](const String &payload) {
     int value = strtol(payload.c_str(), 0, 10);
-    mqttBri = max(1, min(255 >> BRIGHTNESS_SCALE, value));
-    matrix_brightness((mqttBri << BRIGHTNESS_SCALE) * on);
+    mqttBri = max(1, min(255, value));
+    matrix_brightness(mqttBri * on);
     mqttClient.publish(BASE_TOPIC_STATUS "bri", String(mqttBri), MQTT_RETAINED);
   });
 
   mqttClient.subscribe(BASE_TOPIC_SET "on", [](const String &payload) {
     boolean value = payload != "0";
     on = value;
-    matrix_brightness((mqttBri << BRIGHTNESS_SCALE) * on);
+    matrix_brightness(mqttBri * on);
     mqttClient.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
   });
 
