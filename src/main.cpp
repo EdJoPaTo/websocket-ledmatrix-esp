@@ -10,7 +10,7 @@ using namespace ArduinoJson;
 #include "matrix-neomatrix.h"
 
 #define CLIENT_NAME "espMatrix-etVertical"
-const bool MQTT_RETAINED = false;
+const bool MQTT_RETAINED = true;
 
 EspMQTTClient mqttClient(
     WIFI_SSID,
@@ -161,7 +161,7 @@ void setup()
   mqttClient.enableLastWillMessage(BASE_TOPIC "connected", "0", MQTT_RETAINED);
 
   // well, hope we are OK, let's draw some colors first :)
-  testMatrix();
+  // testMatrix();
 
   matrix_fill(0, 0, 0);
   matrix_update();
