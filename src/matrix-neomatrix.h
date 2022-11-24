@@ -15,7 +15,8 @@ NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(TOTAL_PIXELS);
 
 NeoTopology<RowMajorAlternatingLayout> topo(TOTAL_WIDTH, TOTAL_HEIGHT);
 
-struct ColorBufferColor {
+struct ColorBufferColor
+{
 	float r;
 	float g;
 	float b;
@@ -26,7 +27,7 @@ uint8_t globalBrightness = 255;
 
 void matrix_setup(uint8_t brightness)
 {
-    strip.Begin();
+	strip.Begin();
 	globalBrightness = brightness;
 }
 
@@ -37,29 +38,29 @@ void matrix_brightness(uint8_t brightness)
 
 void matrix_update()
 {
-    for (uint16_t i = 0; i < TOTAL_WIDTH * TOTAL_HEIGHT; i++)
-    {
+	for (uint16_t i = 0; i < TOTAL_WIDTH * TOTAL_HEIGHT; i++)
+	{
 		auto color = RgbColor(colorBuffer[i].r, colorBuffer[i].g, colorBuffer[i].b);
 		strip.SetPixelColor(i, color.Dim(globalBrightness));
 	}
 
-    strip.Show();
+	strip.Show();
 
-    for (uint16_t i = 0; i < TOTAL_WIDTH * TOTAL_HEIGHT; i++)
-    {
+	for (uint16_t i = 0; i < TOTAL_WIDTH * TOTAL_HEIGHT; i++)
+	{
 		colorBuffer[i].r *= 0.99;
 		colorBuffer[i].g *= 0.99;
 		colorBuffer[i].b *= 0.99;
-    }
+	}
 }
 
 void matrix_fill(uint8_t red, uint8_t green, uint8_t blue)
 {
 	struct ColorBufferColor color = {(float)red, (float)green, (float)blue};
-    for (uint16_t i = 0; i < TOTAL_WIDTH * TOTAL_HEIGHT; i++)
-    {
+	for (uint16_t i = 0; i < TOTAL_WIDTH * TOTAL_HEIGHT; i++)
+	{
 		colorBuffer[i] = color;
-    }
+	}
 }
 
 void matrix_pixel(uint16_t x, uint16_t y, uint8_t red, uint8_t green, uint8_t blue)
