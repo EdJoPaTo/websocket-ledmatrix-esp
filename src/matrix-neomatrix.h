@@ -3,15 +3,16 @@
 const uint16_t TOTAL_WIDTH = 8;
 const uint16_t TOTAL_HEIGHT = 32;
 
-const int PIN_MATRIX = 13; // D7
-
 const uint16_t TOTAL_PIXELS = TOTAL_WIDTH * TOTAL_HEIGHT;
 
-// TODO: dont use bitbang and move to different PIN
+// Efficient connection via DMA on pin RDX0 GPIO3 RX
 // See <https://github.com/Makuna/NeoPixelBus/wiki/FAQ-%231>
-// PIN MATRIX is RDX0 GPIO3 RX
-// NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(TOTAL_PIXELS);
-NeoPixelBus<NeoGrbFeature, NeoEsp8266BitBang800KbpsMethod> strip(TOTAL_PIXELS, PIN_MATRIX);
+NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(TOTAL_PIXELS);
+
+// bitbanging (Fallback)
+// const int PIN_MATRIX = 13; // D7
+// NeoPixelBus<NeoGrbFeature, NeoEsp8266BitBang800KbpsMethod> strip(TOTAL_PIXELS, PIN_MATRIX);
+
 NeoTopology<RowMajorAlternatingLayout> topo(TOTAL_WIDTH, TOTAL_HEIGHT);
 
 struct ColorBufferColor {
