@@ -110,8 +110,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 		size_t clients = object["clients"];
 		if (lastPublishedClientAmount != clients)
 		{
-			bool success = mqttClient.publish(BASE_TOPIC_STATUS "clients", String(clients), MQTT_RETAINED);
-			if (success)
+			if (mqttClient.publish(BASE_TOPIC_STATUS "clients", String(clients), MQTT_RETAINED))
 			{
 				lastPublishedClientAmount = clients;
 			}
@@ -162,14 +161,14 @@ void setup()
 void onConnectionEstablished()
 {
 	mqttClient.subscribe(BASE_TOPIC_SET "bri", [](const String &payload) {
-		int value = strtol(payload.c_str(), 0, 10);
-		mqttBri = max(1, min(255, value));
+		auto value = strtol(payload.c_str(), 0, 10);
+		mqttBri = max(1l, min(255l, value));
 		matrix_brightness(mqttBri * on);
 		mqttClient.publish(BASE_TOPIC_STATUS "bri", String(mqttBri), MQTT_RETAINED);
 	});
 
 	mqttClient.subscribe(BASE_TOPIC_SET "on", [](const String &payload) {
-		boolean value = payload != "0";
+		auto value = payload == "1" || payload == "true";
 		on = value;
 		matrix_brightness(mqttBri * on);
 		mqttClient.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
@@ -209,7 +208,7 @@ void loop()
 	if (now >= nextCommandsUpdate)
 	{
 		nextCommandsUpdate = now + 1000;
-		float avgCps = mkCommandsPerSecond.addMeasurement(commands);
+		auto avgCps = mkCommandsPerSecond.addMeasurement(commands);
 #ifdef PRINT_TO_SERIAL
 		Serial.printf("Commands  per Second: %8d    Average: %10.2f\n", commands, avgCps);
 #endif
@@ -221,10 +220,10 @@ void loop()
 	if (now >= nextMeasure)
 	{
 		nextMeasure = now + 5000;
-		long rssi = WiFi.RSSI();
-		float avgRssi = mkRssi.addMeasurement(rssi);
+		auto rssi = WiFi.RSSI();
+		auto avgRssi = mkRssi.addMeasurement(rssi);
 #ifdef PRINT_TO_SERIAL
-		Serial.printf("RSSI          in dBm: %8ld    Average: %10.2f\n", rssi, avgRssi);
+		Serial.printf("RSSI          in dBm: %8d    Average: %10.2f\n", rssi, avgRssi);
 #endif
 	}
 
