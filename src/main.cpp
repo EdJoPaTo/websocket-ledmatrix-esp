@@ -123,13 +123,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 		Serial.printf("[WSc] get binary length: %u\n", length);
 #endif
 		break;
-	case WStype_PING:
-		// pong will be send automatically
-		Serial.printf("[WSc] get ping\n");
-		break;
-	case WStype_PONG:
-		// answer to a ping we send
-		Serial.printf("[WSc] get pong\n");
+	default:
 		break;
 	}
 }
