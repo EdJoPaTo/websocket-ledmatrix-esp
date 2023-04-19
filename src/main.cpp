@@ -40,8 +40,8 @@ WebSocketsClient ws;
 MQTTKalmanPublish mkCommandsPerSecond(mqttClient, BASE_TOPIC_STATUS "commands-per-second", false, 30 /* every 30 sec */, 10);
 MQTTKalmanPublish mkRssi(mqttClient, BASE_TOPIC_STATUS "rssi", MQTT_RETAINED, 12 * 5 /* every 5 min */, 10);
 
-boolean on = true;
-uint8_t mqttBri = 2;
+boolean on = false;
+uint8_t mqttBri = 0;
 uint8_t lastConnected = 0;
 
 uint32_t commands = 0;
