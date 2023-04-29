@@ -138,7 +138,7 @@ void setup()
 	ws.onEvent(webSocketEvent);
 	ws.setReconnectInterval(5000);
 	// every ms, timeout ms, failed after n times
-	ws.enableHeartbeat(15000, 3000, 2);
+	ws.enableHeartbeat(5000, 3000, 3);
 
 	matrix_setup(mqttBri);
 
