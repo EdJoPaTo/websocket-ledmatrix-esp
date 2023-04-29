@@ -168,8 +168,7 @@ void onConnectionEstablished()
 	});
 
 	mqttClient.subscribe(BASE_TOPIC_SET "on", [](const String &payload) {
-		auto value = payload == "1" || payload == "true";
-		on = value;
+		on = payload == "1" || payload == "true";
 		matrix_brightness(mqttBri * on);
 		mqttClient.publish(BASE_TOPIC_STATUS "on", String(on), MQTT_RETAINED);
 	});
