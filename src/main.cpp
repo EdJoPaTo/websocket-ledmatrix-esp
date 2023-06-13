@@ -45,7 +45,6 @@ uint8_t mqttBri = 0;
 uint8_t lastConnected = 0;
 
 uint32_t commands = 0;
-size_t lastPublishedClientAmount = 0;
 
 void testMatrix()
 {
@@ -106,15 +105,6 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 		JsonObject object = doc.as<JsonObject>();
 
 		matrix_pixel(object["x"], object["y"], object["r"], object["g"], object["b"]);
-
-		size_t clients = object["clients"];
-		if (lastPublishedClientAmount != clients)
-		{
-			if (mqttClient.publish(BASE_TOPIC_STATUS "clients", String(clients), MQTT_RETAINED))
-			{
-				lastPublishedClientAmount = clients;
-			}
-		}
 	}
 	break;
 	case WStype_BIN:
@@ -176,7 +166,6 @@ void onConnectionEstablished()
 	mqttClient.publish(BASE_TOPIC "git-remote", GIT_REMOTE, MQTT_RETAINED);
 	mqttClient.publish(BASE_TOPIC "git-version", GIT_VERSION, MQTT_RETAINED);
 	lastConnected = 0;
-	lastPublishedClientAmount = 0;
 }
 
 void loop()
